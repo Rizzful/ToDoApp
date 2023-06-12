@@ -6,61 +6,53 @@ import CreateItem from "../../components/CreateItem.component";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import axios from "@/app/api/requests/axios";
 import { Item } from "@/app/types/Item";
-import CheckIcon from "@heroicons/react/24/outline/CheckIcon";
-import XMarkIcon from "@heroicons/react/24/outline/XMarkIcon";
 import MagnifyingGlassIcon from "@heroicons/react/24/outline/MagnifyingGlassIcon";
 import ArrowLeftIcon from "@heroicons/react/24/outline/ArrowLeftIcon";
 import { TrashIcon } from "@heroicons/react/24/outline";
-import { Dialog } from "@headlessui/react";
 import ModalComponent from "../../components/Modal.component";
 import { ModalConfig } from "@/app/types/Modal";
 import ItemComponent from "../../components/Item.component";
 
-export async function generateStaticParams() {
-  const ids = GetAllListIds();
+// export async function generateStaticParams() {
+//   const ids = GetAllListIds();
 
-  return (
-    ids &&
-    ids.map((id) => ({
-      detail: id,
-    }))
-  );
-}
+//   return (
+//     ids &&
+//     ids.map((id) => id && ({
+//       detail: id,
+//     }))
+//   );
+// }
 
-export function getStaticPaths() {
-  const paths = GetAllListIds();
-  return {
-    paths,
-    fallback: false,
-  };
-}
+// export function getStaticPaths(): { paths: { params: { detail: number } }[]; fallback: boolean }{
+//   const paths = GetAllListIds();
+//   return paths ? ({
+//     paths,
+//     fallback: false,
+//   }) : (
+//     { paths: 
+//       [{ params: { detail: 0 }, }], 
+//       fallback: false, }
+//   )
+// }
 
-export const GetAllListIds = () => {
-  const listQuery = useQuery({
-    queryKey: ["list"],
-    queryFn: () => axios.get<List[]>("/list").then(({ data }) => data),
-    refetchInterval: 5000,
-  });
-  return (
-    listQuery.data &&
-    listQuery.data.map((item) => {
-      return {
-        params: {
-          id: item.id,
-        },
-      };
-    })
-  );
-};
-
-export const GetListData = (id: number) => {
-  const listQuery = useQuery({
-    queryKey: ["list"],
-    queryFn: () => axios.get<List[]>("/list").then(({ data }) => data),
-    refetchInterval: 5000,
-  });
-  return listQuery.data && listQuery.data.find((item) => item.id === id);
-};
+// export const GetAllListIds = () => {
+//   const listQuery = useQuery({
+//     queryKey: ["list"],
+//     queryFn: () => axios.get<List[]>("/list").then(({ data }) => data),
+//     refetchInterval: 5000,
+//   });
+//   return (
+//     listQuery.data &&
+//     listQuery.data.map((item) => {
+//       return {
+//         params: {
+//           detail: item.id,
+//         },
+//       };
+//     })
+//   );
+// }
 
 const DetailPage = ({ params }: { params: { detail: number } }) => {
   const [filter, setFilter] = React.useState("all");
@@ -75,7 +67,12 @@ const DetailPage = ({ params }: { params: { detail: number } }) => {
   });
   const { detail: listId } = params;
   const [createItem, setCreateItem] = React.useState<number[]>([]);
-  const data = GetListData(listId);
+  const data = useQuery({
+    queryKey: ["list", listId],
+    queryFn: () =>
+      axios.get<List>(`/list/${listId}`).then(({ data }) => data),
+    refetchInterval: 5000,
+  }).data;
   const router = useRouter();
   const listQuery = useQuery({
     queryKey: ["items", listId],
