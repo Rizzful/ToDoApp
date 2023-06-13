@@ -19,5 +19,4 @@ const getQueryClient = cache(
     })
 );
 
-
 export default getQueryClient;

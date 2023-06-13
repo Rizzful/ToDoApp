@@ -20,6 +20,8 @@ const ItemComponent = ({ list, item }: { list: List; item: Item }) => {
   });
   const closeModal = () => setModal((modal) => ({ ...modal, open: false }));
 
+  console.log()
+
   const updateItem = useMutation({
     mutationFn: (item: Item) =>
       axios.put<Item>(`/list/${list.id}/items/${item.id}`, item),
